@@ -21,6 +21,7 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"slices"
 
@@ -69,12 +70,12 @@ func decodeRelease(data string) (*rspb.Release, error) {
 	if len(b) > 3 && bytes.Equal(b[0:3], magicGzip) {
 		r, err := gzip.NewReader(bytes.NewReader(b))
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to create release gzip reader: %w", err)
 		}
 		defer r.Close()
 		b2, err := io.ReadAll(r)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to read unzipped release: %w", err)
 		}
 		b = b2
 	}
@@ -82,7 +83,7 @@ func decodeRelease(data string) (*rspb.Release, error) {
 	var rls rspb.Release
 	// unmarshal release object bytes
 	if err := json.Unmarshal(b, &rls); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal release: %w", err)
 	}
 	return &rls, nil
 }
