@@ -283,10 +283,24 @@ func (i *Install) RunWithContext(ctx context.Context, ch ci.Charter, vals map[st
 		return nil, fmt.Errorf("release name check failed: %w", err)
 	}
 
+	fmt.Printf("===== VALUES BEFORE: \n")
+	before, err := yaml.Marshal(vals)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(before))
+
 	if err := chartutil.ProcessDependencies(chrt, vals); err != nil {
 		i.cfg.Logger().Error("chart dependencies processing failed", slog.Any("error", err))
 		return nil, fmt.Errorf("chart dependencies processing failed: %w", err)
 	}
+
+	fmt.Printf("===== VALUES AFTER: \n")
+	after, err := yaml.Marshal(vals)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(after))
 
 	// Pre-install anything in the crd/ directory. We do this before Helm
 	// contacts the upstream server and builds the capabilities object.
